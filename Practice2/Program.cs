@@ -14,7 +14,7 @@ namespace Practice2;
 
 internal static class Program
 {
-    private static void Main(string[] args)
+    private static void Main()
     {
         var form = new Form();
         form.AutoScroll = true;

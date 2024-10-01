@@ -1,6 +1,6 @@
-namespace Multimedia;
-
 using BitmapExtensions;
+
+namespace Multimedia;
 
 internal static class Program
 {

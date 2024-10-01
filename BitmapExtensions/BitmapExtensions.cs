@@ -1,7 +1,7 @@
-using System.Runtime.Versioning;
-
 namespace BitmapExtensions;
+
 using System.Drawing;
+using System.Runtime.Versioning;
 
 [SupportedOSPlatform("windows")]
 public static class BitmapExtensions
