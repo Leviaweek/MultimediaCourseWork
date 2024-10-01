@@ -3,14 +3,19 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>net8.0-windows</TargetFramework>
-        <Nullable>enable</Nullable>
         <UseWindowsForms>true</UseWindowsForms>
         <ImplicitUsings>enable</ImplicitUsings>
-        <RootNamespace>Multimedia</RootNamespace>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\BitmapExtensions\BitmapExtensions.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
+      <PackageReference Include="ScottPlot" Version="5.0.39" />
+      <PackageReference Include="ScottPlot.WinForms" Version="5.0.39" />
     </ItemGroup>
 
 </Project>

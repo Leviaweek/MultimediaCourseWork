@@ -1,5 +1,9 @@
-namespace Multimedia;
+using System.Runtime.Versioning;
 
+namespace BitmapExtensions;
+using System.Drawing;
+
+[SupportedOSPlatform("windows")]
 public static class BitmapExtensions
 {
     public static Bitmap ToGrayscale(this Bitmap source)
@@ -31,7 +35,6 @@ public static class BitmapExtensions
         var width = source.Width;
         var height = source.Height;
         var resultImage = new Bitmap(width, height);
-        
         for (var y = 0; y < height; y++)
         {
             for (var x = 0; x < width; x++)
@@ -101,5 +104,49 @@ public static class BitmapExtensions
             }
         }
         return iMin;
+    }
+    
+    public static IEnumerable<double> GetHistogram(this Bitmap source)
+    {
+        for (var y = 0; y < source.Height; y++)
+        {
+            for (var x = 0; x < source.Width; x++)
+            {
+                var intensity = source.GetPixel(x, y).R;
+                yield return intensity;
+            }
+        }
+    }
+
+    public static Bitmap Transform(this Bitmap source, Func<Color, Color> action)
+    {
+        var result = new Bitmap(source.Width, source.Height);
+        for (var y = 0; y < source.Height; y++)
+        {
+            for (var x = 0; x < source.Width; x++)
+            {
+                var pixel = source.GetPixel(x, y);
+                var transformed = action(pixel);
+                result.SetPixel(x, y, transformed);
+            }
+        }
+
+        return result;
+    }
+
+    public static Bitmap GetEqualized(this Bitmap source, double[] sourceArray)
+    {
+        var result = new Bitmap(source.Width, source.Height);
+        for (var y = 0; y < source.Height; y++)
+        {
+            for (var x = 0; x < source.Width; x++)
+            {
+                var pixel = source.GetPixel(x, y);
+                var item = (byte)sourceArray[pixel.R];
+                result.SetPixel(x, y, Color.FromArgb(item, item, item));
+            }
+        }
+
+        return result;
     }
 }

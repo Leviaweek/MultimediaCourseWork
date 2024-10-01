@@ -1,8 +1,10 @@
 namespace Multimedia;
 
+using BitmapExtensions;
+
 internal static class Program
 {
-    private const string ImagePath = @"E:\Projects\University\Practice1\Course work\C#\Image\pes.jpg";
+    private const string ImagePath = @"E:\Projects\University\Multimedia\Course work\C#\Image\pes.jpg";
     private const byte L = 255;
     private const byte Low = 20;
     private const byte High = 160;
