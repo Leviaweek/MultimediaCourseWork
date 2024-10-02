@@ -1,4 +1,4 @@
-namespace BitmapExtensions;
+namespace Common;
 
 using System.Drawing;
 using System.Runtime.Versioning;
@@ -50,7 +50,7 @@ public static class BitmapExtensions
         }
     }
 
-    public static Bitmap Transform(this Bitmap source, Func<Color, Color> action)
+    public static Bitmap Transform<T>(this Bitmap source, Func<Color, T> action, Func<T, Color> calculatePixel)
     {
         var result = new Bitmap(source.Width, source.Height);
         for (var y = 0; y < source.Height; y++)
@@ -59,10 +59,10 @@ public static class BitmapExtensions
             {
                 var pixel = source.GetPixel(x, y);
                 var transformed = action(pixel);
-                result.SetPixel(x, y, transformed);
+                var color = calculatePixel(transformed);
+                result.SetPixel(x, y, color);
             }
         }
-
         return result;
     }
 }

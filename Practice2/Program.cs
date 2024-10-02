@@ -1,5 +1,4 @@
-﻿using BitmapExtensions;
-using MathNet.Numerics;
+﻿using Common;
 using MathNet.Numerics.LinearAlgebra;
 using ScottPlot;
 using ScottPlot.Panels;
@@ -15,16 +14,14 @@ namespace Practice2;
 
 internal static class Program
 {
+    private const string FilePath = @"E:\Projects\University\Multimedia\Course work\C#\Image\pes.jpg";
     private static void Main()
     {
         var form = new Form();
         form.AutoScroll = true;
-        var img = new Bitmap(@"E:\Projects\University\Multimedia\Course work\C#\Image\pes.jpg");
-        var grey = img.Transform(color =>
-        {
-            var grey = (byte)(0.299 * color.R + 0.587 * color.G + 0.114 * color.B);
-            return Color.FromArgb(grey, grey, grey);
-        });
+        var img = new Bitmap(FilePath);
+        var grey = img.Transform(color => (byte)(0.299 * color.R + 0.587 * color.G + 0.114 * color.B), 
+            color => Color.FromArgb(color, color, color));
 
         form.Controls.Add(CreateImagePanel(grey, "Original grey image", 0, 5800));
 
@@ -44,7 +41,7 @@ internal static class Program
         {
             Location = new Point(0, 0)
         };
-        formsPlots.Plot.Axes.AddPanel(new TitlePanel()
+        formsPlots.Plot.Axes.AddPanel(new TitlePanel
         {
             Label =
             {
@@ -78,11 +75,8 @@ internal static class Program
         var distension = grey.Transform(color =>
             Color.FromArgb(color.R - iMin,
                 color.G - iMin,
-                color.B - iMin)).Transform(color =>
-        {
-            var resultColor = color.R * (byte)(255 / k);
-            return Color.FromArgb(resultColor, resultColor, resultColor);
-        });
+                color.B - iMin), color => color).Transform(color => (byte)(color.R * (255 / k)), 
+            color => Color.FromArgb(color, color, color));
         formPlots2.Plot.Axes.AutoScale();
         formPlots2.Plot.Axes.AddPanel(new TitlePanel
         {
@@ -137,14 +131,11 @@ internal static class Program
         });
         var cumMax = cum.Max();
         var cumMin = cum.Min();
-        var cumSum = cum.Select(x => Math.Max(0, x - cumMin))
-            .Select(x => Math.Max(0, x * 255 / (cumMax - cumMin)))
+        var cumSum = cum.Select(x => x - cumMin * CustomMath.Step(x, 0))
+            .Select(x => x * (255 / (cumMax - cumMin) * CustomMath.Step(x, 0)))
             .ToArray();
-        var equalized = grey.Transform(color =>
-        {
-            var item = (byte)cumSum[color.R];
-            return Color.FromArgb(item, item, item);
-        });
+        var equalized = grey.Transform(color => (byte)cumSum[color.R],
+            color => Color.FromArgb(color, color, color));
         var iMax = equalized.GetIMax();
         var iMin = equalized.GetIMin();
         var k = iMax - iMin;

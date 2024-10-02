@@ -1,4 +1,4 @@
-using BitmapExtensions;
+using Common;
 
 namespace Multimedia;
 
@@ -19,33 +19,23 @@ internal static class Program
         var image = new Bitmap(ImagePath);
         
         var grayImage = image.Transform(
-            color =>
-            {
-                var grey = (byte)(0.299 * color.R + 0.587 * color.G + 0.114 * color.B);
-                return Color.FromArgb(grey, grey, grey);
-            });
+            color => (byte)(0.299 * color.R + 0.587 * color.G + 0.114 * color.B),
+            color => Color.FromArgb(color, color, color));
         
         var iMin = grayImage.GetIMin();
         var iMax = grayImage.GetIMax();
 
         var transformedImage = grayImage.Transform(color =>
         {
-            var grayPixel = color.R;
-
-            var normalized = (grayPixel - iMin) / (double)(iMax - iMin);
+            var normalized = (color.R - iMin) / (double)(iMax - iMin);
             var gammaCorrected = Math.Pow(normalized, Gamma);
             var transformed = gammaCorrected * (High - Low) + Low;
                 
-            var final = (byte)Math.Max(Low, Math.Min(High, transformed));
-            return Color.FromArgb(final, final, final);
-        });
+            return (byte)Math.Max(Low, Math.Min(High, transformed));
+        }, color => Color.FromArgb(color, color, color));
 
-        var inverted = grayImage.Transform(color =>
-        {
-            var grayValue = color.R;
-            var negativeValue = (byte)(255 - grayValue);
-            return Color.FromArgb(negativeValue, negativeValue, negativeValue);
-        });
+        var inverted = grayImage.Transform(color => (byte)(255 - color.R), 
+            color => Color.FromArgb(color, color, color));
 
         var k = (iMax - iMin) / (double)L;
         
@@ -59,8 +49,10 @@ internal static class Program
         
         var originalPanel = CreateImagePanel(image, "Original Image", 10, 10);
         var grayPanel = CreateImagePanel(grayImage, $"Grayscale Image K = {k:F1}", 300, 10);
-        var transformedPanel = CreateImagePanel(transformedImage, $"Transformed Image (low={Low}, high={High}, γ={Gamma})", 10, 300);
-        var invertedPanel = CreateImagePanel(inverted, $"Inverted Image Imax = {iMax:F1}, Imin = ({iMin:F1}, K = {k:F1})", 300, 300);
+        var transformedPanel = CreateImagePanel(transformedImage,
+            $"Transformed Image (low={Low}, high={High}, γ={Gamma})", 10, 300);
+        var invertedPanel = CreateImagePanel(inverted,
+            $"Inverted Image Imax = {iMax:F1}, Imin = ({iMin:F1}, K = {k:F1})", 300, 300);
         form.Controls.Add(originalPanel);
         form.Controls.Add(grayPanel);
         form.Controls.Add(transformedPanel);

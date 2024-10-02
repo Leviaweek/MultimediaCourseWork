@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Practice1", "Practice1\Practice1.csproj", "{CEE34CE2-6177-444B-BE00-769721E8AFA8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitmapExtensions", "BitmapExtensions\BitmapExtensions.csproj", "{F1B5F341-2A15-4167-996C-CC2F36968FC9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{F1B5F341-2A15-4167-996C-CC2F36968FC9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Practice2", "Practice2\Practice2.csproj", "{AB3FE418-9FED-4C7D-BEA1-BA4EA1FFC3D6}"
 EndProject
