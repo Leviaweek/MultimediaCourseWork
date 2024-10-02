@@ -1,4 +1,5 @@
 ﻿using BitmapExtensions;
+using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using ScottPlot;
 using ScottPlot.Panels;
@@ -26,13 +27,13 @@ internal static class Program
         });
 
         form.Controls.Add(CreateImagePanel(grey, "Original grey image", 0, 5800));
-        
+
         var distension = FirstStage(grey, form);
 
         var equalized = SecondStage(distension, grey, form);
-        
+
         ThirdStage(equalized, form);
-        
+
         Application.Run(form);
     }
 
@@ -110,7 +111,7 @@ internal static class Program
                 Text = "Distension histogram"
             }
         });
-        
+
         var intensities = distension.GetFlatten().ToArray();
         var histogram = new Histogram(0, intensities.Max(), 256);
         histogram.AddRange(intensities);
@@ -136,17 +137,9 @@ internal static class Program
         });
         var cumMax = cum.Max();
         var cumMin = cum.Min();
-        var cumSum = cum.Select(x =>
-        {
-            if (x == 0)
-                return x;
-            return x - cumMin;
-        }).Select(x =>
-        {
-            if (x == 0)
-                return x;
-            return x * 255 / (cumMax - cumMin);
-        }).ToArray();
+        var cumSum = cum.Select(x => Math.Max(0, x - cumMin))
+            .Select(x => Math.Max(0, x * 255 / (cumMax - cumMin)))
+            .ToArray();
         var equalized = grey.Transform(color =>
         {
             var item = (byte)cumSum[color.R];
@@ -214,6 +207,7 @@ internal static class Program
             })
             .ToList();
     }
+
     private static Panel CreateImagePanel(Bitmap image, string text, int x = 0, int y = 0)
     {
         var panel = new Panel
