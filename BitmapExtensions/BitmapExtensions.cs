@@ -6,54 +6,7 @@ using System.Runtime.Versioning;
 [SupportedOSPlatform("windows")]
 public static class BitmapExtensions
 {
-    public static Bitmap ToGrayscale(this Bitmap source)
-    {
-        var width = source.Width;
-        var height = source.Height;
-        var resultImage = new Bitmap(width, height);
-        
-        for (var y = 0; y < height; y++)
-        {
-            for (var x = 0; x < width; x++)
-            {
-                var sourcePixel = source.GetPixel(x, y);
-                var grey = (byte)(0.299 * sourcePixel.R + 0.587 * sourcePixel.G + 0.114 * sourcePixel.B);
-                var greyPixel = Color.FromArgb(grey, grey, grey);
-                resultImage.SetPixel(x, y, greyPixel);
-            }
-        }
-        return resultImage;
-    }
-
-    public static Bitmap ToTransformedGrayscale(this Bitmap source,
-        double gamma,
-        double low,
-        double high,
-        byte iMin,
-        byte iMax)
-    {
-        var width = source.Width;
-        var height = source.Height;
-        var resultImage = new Bitmap(width, height);
-        for (var y = 0; y < height; y++)
-        {
-            for (var x = 0; x < width; x++)
-            {
-                var sourcePixel = source.GetPixel(x, y);
-                var grayPixel = sourcePixel.R;
-
-                var normalized = (grayPixel - iMin) / (double)(iMax - iMin);
-                var gammaCorrected = Math.Pow(normalized, gamma);
-                var transformed = gammaCorrected * (high - low) + low;
-                
-                var final = (byte)Math.Max(low, Math.Min(high, transformed));
-                resultImage.SetPixel(x, y, Color.FromArgb(final, final, final));
-            }
-        }
-        return resultImage;
-    }
-
-    public static Bitmap ToNegative(this Bitmap source, byte iMax)
+    public static Bitmap ToNegative(this Bitmap source)
     {
         var width = source.Width;
         var height = source.Height;
@@ -106,7 +59,7 @@ public static class BitmapExtensions
         return iMin;
     }
     
-    public static IEnumerable<double> GetHistogram(this Bitmap source)
+    public static IEnumerable<double> GetFlatten(this Bitmap source)
     {
         for (var y = 0; y < source.Height; y++)
         {
@@ -128,22 +81,6 @@ public static class BitmapExtensions
                 var pixel = source.GetPixel(x, y);
                 var transformed = action(pixel);
                 result.SetPixel(x, y, transformed);
-            }
-        }
-
-        return result;
-    }
-
-    public static Bitmap GetEqualized(this Bitmap source, double[] sourceArray)
-    {
-        var result = new Bitmap(source.Width, source.Height);
-        for (var y = 0; y < source.Height; y++)
-        {
-            for (var x = 0; x < source.Width; x++)
-            {
-                var pixel = source.GetPixel(x, y);
-                var item = (byte)sourceArray[pixel.R];
-                result.SetPixel(x, y, Color.FromArgb(item, item, item));
             }
         }
 

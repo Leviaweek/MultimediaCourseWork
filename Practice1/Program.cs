@@ -18,14 +18,34 @@ internal static class Program
         ApplicationConfiguration.Initialize();
         var image = new Bitmap(ImagePath);
         
-        var grayImage = image.ToGrayscale();
+        var grayImage = image.Transform(
+            color =>
+            {
+                var grey = (byte)(0.299 * color.R + 0.587 * color.G + 0.114 * color.B);
+                return Color.FromArgb(grey, grey, grey);
+            });
         
         var iMin = grayImage.GetIMin();
         var iMax = grayImage.GetIMax();
 
-        var transformedImage = grayImage.ToTransformedGrayscale(Gamma, Low, High, iMin, iMax);
+        var transformedImage = grayImage.Transform(color =>
+        {
+            var grayPixel = color.R;
 
-        var inverted = grayImage.ToNegative(iMax);
+            var normalized = (grayPixel - iMin) / (double)(iMax - iMin);
+            var gammaCorrected = Math.Pow(normalized, Gamma);
+            var transformed = gammaCorrected * (High - Low) + Low;
+                
+            var final = (byte)Math.Max(Low, Math.Min(High, transformed));
+            return Color.FromArgb(final, final, final);
+        });
+
+        var inverted = grayImage.Transform(color =>
+        {
+            var grayValue = color.R;
+            var negativeValue = (byte)(255 - grayValue);
+            return Color.FromArgb(negativeValue, negativeValue, negativeValue);
+        });
 
         var k = (iMax - iMin) / (double)L;
         

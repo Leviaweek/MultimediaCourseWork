@@ -19,7 +19,11 @@ internal static class Program
         var form = new Form();
         form.AutoScroll = true;
         var img = new Bitmap(@"E:\Projects\University\Multimedia\Course work\C#\Image\pes.jpg");
-        var grey = img.ToGrayscale();
+        var grey = img.Transform(color =>
+        {
+            var grey = (byte)(0.299 * color.R + 0.587 * color.G + 0.114 * color.B);
+            return Color.FromArgb(grey, grey, grey);
+        });
 
         form.Controls.Add(CreateImagePanel(grey, "Original grey image", 0, 5800));
         
@@ -34,7 +38,7 @@ internal static class Program
 
     private static Bitmap FirstStage(Bitmap grey, Form form)
     {
-        var intensities = grey.GetHistogram().ToArray();
+        var intensities = grey.GetFlatten().ToArray();
         var formsPlots = new FormsPlot
         {
             Location = new Point(0, 0)
@@ -107,7 +111,7 @@ internal static class Program
             }
         });
         
-        var intensities = distension.GetHistogram().ToArray();
+        var intensities = distension.GetFlatten().ToArray();
         var histogram = new Histogram(0, intensities.Max(), 256);
         histogram.AddRange(intensities);
 
@@ -130,28 +134,34 @@ internal static class Program
                 Text = "Distension Cumulative function"
             }
         });
-        var iMax = cum.Max();
-        var iMin = cum.Min();
-        var k = iMax - iMin;
+        var cumMax = cum.Max();
+        var cumMin = cum.Min();
         var cumSum = cum.Select(x =>
         {
             if (x == 0)
                 return x;
-            return x - iMin;
+            return x - cumMin;
         }).Select(x =>
         {
             if (x == 0)
                 return x;
-            return x * 255 / (iMax - iMin);
+            return x * 255 / (cumMax - cumMin);
         }).ToArray();
-        var equalized = grey.GetEqualized(cumSum);
+        var equalized = grey.Transform(color =>
+        {
+            var item = (byte)cumSum[color.R];
+            return Color.FromArgb(item, item, item);
+        });
+        var iMax = equalized.GetIMax();
+        var iMin = equalized.GetIMin();
+        var k = iMax - iMin;
         form.Controls.Add(CreateImagePanel(equalized, $"Equalization, Imax = {iMax}, Imin = {iMin}, K = {k}", 0, 3700));
         return equalized;
     }
 
     private static void ThirdStage(Bitmap equalized, Form form)
     {
-        var intensities3 = equalized.GetHistogram().ToArray();
+        var intensities3 = equalized.GetFlatten().ToArray();
         var histogram3 = new Histogram(0, intensities3.Max(), 256);
         histogram3.AddRange(intensities3);
         var formsPlot1 = new FormsPlot
