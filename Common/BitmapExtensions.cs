@@ -1,9 +1,8 @@
 using System.Numerics;
-
-namespace Common;
-
 using System.Drawing;
 using System.Runtime.Versioning;
+
+namespace Common;
 
 [SupportedOSPlatform("windows")]
 public static class BitmapExtensions
@@ -17,8 +16,7 @@ public static class BitmapExtensions
             {
                 var sourcePixel = source.GetPixel(x, y);
                 var srcR = sourcePixel.R;
-                if (srcR > iMax)
-                    iMax = srcR;
+                iMax = Math.Max(iMax, srcR);
             }
         }
         return iMax;
@@ -33,8 +31,7 @@ public static class BitmapExtensions
             {
                 var sourcePixel = source.GetPixel(x, y);
                 var srcR = sourcePixel.R;
-                if (srcR < iMin)
-                    iMin = srcR;
+                iMin = Math.Min(iMin, srcR);
             }
         }
         return iMin;
