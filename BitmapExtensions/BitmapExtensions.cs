@@ -6,27 +6,6 @@ using System.Runtime.Versioning;
 [SupportedOSPlatform("windows")]
 public static class BitmapExtensions
 {
-    public static Bitmap ToNegative(this Bitmap source)
-    {
-        var width = source.Width;
-        var height = source.Height;
-        var negativeImage = new Bitmap(width, height);
-        
-        for (var y = 0; y < height; y++)
-        {
-            for (var x = 0; x < width; x++)
-            {
-                var pixel = source.GetPixel(x, y);
-                var grayValue = pixel.R;
-                
-                var negativeValue = (byte)(255 - grayValue);
-                
-                negativeImage.SetPixel(x, y, Color.FromArgb(negativeValue, negativeValue, negativeValue));
-            }
-        }
-        return negativeImage;
-    }
-    
     public static byte GetIMax(this Bitmap source)
     {
         var iMax = byte.MinValue;
