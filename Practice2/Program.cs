@@ -20,8 +20,7 @@ internal static class Program
         var form = new Form();
         form.AutoScroll = true;
         var img = new Bitmap(FilePath);
-        var grey = img.Transform(color => (byte)(0.299 * color.R + 0.587 * color.G + 0.114 * color.B), 
-            color => Color.FromArgb(color, color, color));
+        var grey = img.Transform(color => 0.299 * color.R + 0.587 * color.G + 0.114 * color.B);
 
         form.Controls.Add(CreateImagePanel(grey, "Original grey image", 0, 5800));
 
@@ -75,8 +74,7 @@ internal static class Program
         var distension = grey.Transform(color =>
             Color.FromArgb(color.R - iMin,
                 color.G - iMin,
-                color.B - iMin), color => color).Transform(color => (byte)(color.R * (255 / k)), 
-            color => Color.FromArgb(color, color, color));
+                color.B - iMin)).Transform(color =>  color.R * (255 / k));
         formPlots2.Plot.Axes.AutoScale();
         formPlots2.Plot.Axes.AddPanel(new TitlePanel
         {
@@ -91,14 +89,14 @@ internal static class Program
 
     private static Bitmap SecondStage(Bitmap distension, Bitmap grey, Form form)
     {
-        var formPlots1 = new FormsPlot
+        var formsPlot1 = new FormsPlot
         {
             Location = new Point(0, 2300),
             Size = new Size(800, 600)
         };
-        form.Controls.Add(formPlots1);
-        formPlots1.Plot.Axes.AutoScale();
-        formPlots1.Plot.Axes.AddPanel(new TitlePanel
+        form.Controls.Add(formsPlot1);
+        formsPlot1.Plot.Axes.AutoScale();
+        formsPlot1.Plot.Axes.AddPanel(new TitlePanel
         {
             Label =
             {
@@ -106,13 +104,13 @@ internal static class Program
             }
         });
 
-        var intensities = distension.GetFlatten().ToArray();
-        var histogram = new Histogram(0, intensities.Max(), 256);
-        histogram.AddRange(intensities);
+        var intensities1 = distension.GetFlatten().ToArray();
+        var histogram1 = new Histogram(0, intensities1.Max(), 256);
+        histogram1.AddRange(intensities1);
 
-        formPlots1.Plot.Add.Bars(HistogramToBars(histogram.Bins, histogram.Counts, histogram.BinSize));
-        var cum = Vector<double>.Build.Dense(histogram.GetCumulative());
-        var normCum = cum * (histogram.Counts.Max() / cum.Max());
+        formsPlot1.Plot.Add.Bars(HistogramToBars(histogram1.Bins, histogram1.Counts, histogram1.BinSize));
+        var cum = Vector<double>.Build.Dense(histogram1.GetCumulative());
+        var normCum = cum * (histogram1.Counts.Max() / cum.Max());
         var formsPlot2 = new FormsPlot
         {
             Location = new Point(0, 3000),
@@ -134,26 +132,26 @@ internal static class Program
         var cumSum = cum.Select(x => x - cumMin * CustomMath.Step(x, 0))
             .Select(x => x * (255 / (cumMax - cumMin) * CustomMath.Step(x, 0)))
             .ToArray();
-        var equalized = grey.Transform(color => (byte)cumSum[color.R],
-            color => Color.FromArgb(color, color, color));
+        var equalized = grey.Transform(color => cumSum[color.R]);
         var iMax = equalized.GetIMax();
         var iMin = equalized.GetIMin();
         var k = iMax - iMin;
-        form.Controls.Add(CreateImagePanel(equalized, $"Equalization, Imax = {iMax}, Imin = {iMin}, K = {k}", 0, 3700));
+        form.Controls.Add(CreateImagePanel(equalized, 
+            $"Equalization, Imax = {iMax}, Imin = {iMin}, K = {k}", 0, 3700));
         return equalized;
     }
 
     private static void ThirdStage(Bitmap equalized, Form form)
     {
-        var intensities3 = equalized.GetFlatten().ToArray();
-        var histogram3 = new Histogram(0, intensities3.Max(), 256);
-        histogram3.AddRange(intensities3);
+        var intensities1 = equalized.GetFlatten().ToArray();
+        var histogram1 = new Histogram(0, intensities1.Max(), 256);
+        histogram1.AddRange(intensities1);
         var formsPlot1 = new FormsPlot
         {
             Location = new Point(0, 4400),
             Size = new Size(800, 600)
         };
-        formsPlot1.Plot.Add.Bars(HistogramToBars(histogram3.Bins, histogram3.Counts, histogram3.BinSize));
+        formsPlot1.Plot.Add.Bars(HistogramToBars(histogram1.Bins, histogram1.Counts, histogram1.BinSize));
         form.Controls.Add(formsPlot1);
         formsPlot1.Plot.Axes.AutoScale();
         formsPlot1.Plot.Axes.AddPanel(new TitlePanel
@@ -163,19 +161,16 @@ internal static class Program
                 Text = "Equalization histogram"
             }
         });
-        var cum3 = Vector<double>.Build.Dense(histogram3.GetCumulative());
-        var normCum3 = cum3 * (histogram3.Counts.Max() / cum3.Max());
-        var formsPlot2 = new FormsPlot()
+        var cum1 = Vector<double>.Build.Dense(histogram1.GetCumulative());
+        var normCum1 = cum1 * (histogram1.Counts.Max() / cum1.Max());
+        var formsPlot2 = new FormsPlot
         {
             Location = new Point(0, 5100),
             Size = new Size(800, 600)
         };
         form.Controls.Add(formsPlot2);
-        formsPlot2.Plot.Add.Scatter(Enumerable.Range(0,
-                        normCum3.Count)
-                    .ToArray(),
-                (normCum3 / normCum3.Max()).ToArray())
-            .MarkerSize = 0;
+        formsPlot2.Plot.Add.Scatter(Enumerable.Range(0, normCum1.Count).ToArray(),
+            (normCum1 / normCum1.Max()).ToArray()).MarkerSize = 0;
         formsPlot2.Plot.Axes.AutoScale();
         formsPlot2.Plot.Axes.AddPanel(new TitlePanel
         {
@@ -188,8 +183,7 @@ internal static class Program
 
     private static List<Bar> HistogramToBars(double[] bins, double[] counts, double binSize)
     {
-        return counts.Select((t,
-                i) => new Bar
+        return counts.Select((t, i) => new Bar
             {
                 Position = bins[i],
                 Value = t,

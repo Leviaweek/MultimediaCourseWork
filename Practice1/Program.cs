@@ -18,9 +18,7 @@ internal static class Program
         ApplicationConfiguration.Initialize();
         var image = new Bitmap(ImagePath);
         
-        var grayImage = image.Transform(
-            color => (byte)(0.299 * color.R + 0.587 * color.G + 0.114 * color.B),
-            color => Color.FromArgb(color, color, color));
+        var grayImage = image.Transform(color => 0.299 * color.R + 0.587 * color.G + 0.114 * color.B);
         
         var iMin = grayImage.GetIMin();
         var iMax = grayImage.GetIMax();
@@ -31,11 +29,10 @@ internal static class Program
             var gammaCorrected = Math.Pow(normalized, Gamma);
             var transformed = gammaCorrected * (High - Low) + Low;
                 
-            return (byte)Math.Max(Low, Math.Min(High, transformed));
-        }, color => Color.FromArgb(color, color, color));
+            return Math.Max(Low, Math.Min(High, transformed));
+        });
 
-        var inverted = grayImage.Transform(color => (byte)(255 - color.R), 
-            color => Color.FromArgb(color, color, color));
+        var inverted = grayImage.Transform(color => 255 - color.R);
 
         var k = (iMax - iMin) / (double)L;
         

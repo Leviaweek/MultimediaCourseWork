@@ -1,3 +1,5 @@
+using System.Numerics;
+
 namespace Common;
 
 using System.Drawing;
@@ -50,7 +52,7 @@ public static class BitmapExtensions
         }
     }
 
-    public static Bitmap Transform<T>(this Bitmap source, Func<Color, T> action, Func<T, Color> calculatePixel)
+    public static Bitmap Transform(this Bitmap source, Func<Color, Color> action)
     {
         var result = new Bitmap(source.Width, source.Height);
         for (var y = 0; y < source.Height; y++)
@@ -59,10 +61,14 @@ public static class BitmapExtensions
             {
                 var pixel = source.GetPixel(x, y);
                 var transformed = action(pixel);
-                var color = calculatePixel(transformed);
-                result.SetPixel(x, y, color);
+                result.SetPixel(x, y, transformed);
             }
         }
         return result;
     }
+
+    public static Color ByteToColor(byte color) => Color.FromArgb(color, color, color);
+    
+    public static Bitmap Transform<T>(this Bitmap source, Func<Color, T> action) where T : INumber<T> =>
+        source.Transform(color => ByteToColor(Convert.ToByte(action(color))));
 }
