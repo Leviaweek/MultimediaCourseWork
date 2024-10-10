@@ -17,24 +17,27 @@ internal static class Program
         form.Size = new Size(1280, 720);
         
         var img = new Bitmap(FilePath);
+        Console.WriteLine("LMin: {0}, LMax: {1}", img.GetIMin(), img.GetIMax());
         form.Controls.Add(CreateImagePanel(img, "Original"));
         imagePositionY += imagePositionOffset;
         
         var random = new Random();
-        const float sigma = VariantNumber / 100;
+        var sigma = Math.Sqrt(VariantNumber / 100);
         Console.WriteLine(random.NextDouble() * sigma + M);
-        var additive = img.Transform(color =>
-        {
-            var r = Clamp(color.R + (int)(random.NextDouble() * sigma + M));
-            var g = Clamp(color.G + (int)(random.NextDouble() * sigma + M));
-            var b = Clamp(color.B + (int)(random.NextDouble() * sigma + M));
-            return Color.FromArgb(r, g, b);
-        });
+        var additive = img
+            .Transform(color =>
+            {
+                var r = Clamp((int)(color.R + (random.NextDouble() * sigma + M) * 255));
+                var g = Clamp((int)(color.G + (random.NextDouble() * sigma + M) * 255));
+                var b = Clamp((int)(color.B + (random.NextDouble() * sigma + M) * 255));
+                return Color.FromArgb(r, g, b);
+            });
         form.Controls.Add(CreateImagePanel(additive, "Additive noise", 0, imagePositionY));
         imagePositionY += imagePositionOffset;
 
         Console.WriteLine(1 + sigma * (random.NextDouble() - 0.5));
-        var multiplicative = img.Transform(color =>
+        var multiplicative = img
+            .Transform(color =>
         {
             var noiseFactor = 1 + sigma * (random.NextDouble() - 0.5);
             var r = Clamp((int)(color.R * noiseFactor));
